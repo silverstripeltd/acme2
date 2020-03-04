@@ -86,7 +86,13 @@ class AuthorizationService
      */
     public function getAuthorization()
     {
-        list($code, $header , $body) = RequestHelper::get($this->authorizationUrl);
+        $jwk = OpenSSLHelper::generateJWSOfKid(
+            $this->authorizationUrl,
+            Client::$runtime->account->getAccountUrl(),
+            ""
+        );
+
+        list($code, $header , $body) = RequestHelper::post($this->authorizationUrl, $jwk);
 
         if ($code != 200)
         {

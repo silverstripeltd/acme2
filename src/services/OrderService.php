@@ -283,7 +283,13 @@ class OrderService
     {
         $orderUrl = $this->getOrderInfoFromCache()['orderUrl'];
 
-        list($code, $header, $body) = RequestHelper::get($orderUrl);
+        $jwk = OpenSSLHelper::generateJWSOfKid(
+            $orderUrl,
+            Client::$runtime->account->getAccountUrl(),
+            ""
+        );
+
+        list($code, $header, $body) = RequestHelper::post($orderUrl, $jwk);
 
         if ($code != 200)
         {
@@ -394,7 +400,13 @@ class OrderService
             throw new OrderException("Fetch certificate from letsencrypt failed, timed out after {$timeout} seconds.");
         }
 
-        list($code, $header, $body) = RequestHelper::get($this->certificate);
+        $jwk = OpenSSLHelper::generateJWSOfKid(
+            $this->certificate,
+            Client::$runtime->account->getAccountUrl(),
+            ""
+        );
+
+        list($code, $header, $body) = RequestHelper::post($this->certificate, $jwk);
 
         if ($code != 200)
         {
